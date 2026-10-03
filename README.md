@@ -52,6 +52,16 @@ The API applies database migrations on startup. The defaults in `docker-compose.
 
 Picture uploads need a Cloudinary account: put its `CLOUDINARY_URL` (from the Cloudinary dashboard) in `.env`. Without it the admin area works, but uploading a picture shows a message that uploads are not configured.
 
+### Deploy to Render (works from a phone)
+
+`render.yaml` describes the whole stack: the public site, the private API and a PostgreSQL database.
+
+1. Push the repo to GitHub, then in the Render dashboard choose **New → Blueprint** and pick it.
+2. When asked, paste your `CLOUDINARY_URL` (`cloudinary://<api_key>:<api_secret>@<cloud_name>`).
+3. After the first deploy open `https://<kuskus-web>.onrender.com/admin`, log in with `admin`, and change the password.
+
+The database uses a paid Render plan (`basic-256mb`); the free one expires after 30 days.
+
 ### Prerequisites for running parts separately
 - Node.js (LTS)
 - .NET 10 SDK, plus `dotnet tool install --global dotnet-ef` for migrations

@@ -26,7 +26,7 @@ var builder = WebApplication.CreateBuilder(args);
 var config = builder.Configuration;
 
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(config.GetConnectionString("Default")));
+    options.UseNpgsql(ConnectionStringNormalizer.Normalize(config.GetConnectionString("Default"))));
 
 builder.Services.Configure<JwtOptions>(config.GetSection(JwtOptions.Section));
 builder.Services.Configure<AdminOptions>(config.GetSection(AdminOptions.Section));

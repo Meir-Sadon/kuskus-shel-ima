@@ -1,0 +1,50 @@
+# Render blueprint: Dashboard -> New -> Blueprint -> pick this repo.
+# Site (nginx + React) is the only public service; the API and database stay on Render's private network.
+databases:
+  - name: kuskus-db
+    databaseName: kuskus
+    user: kuskus
+    plan: basic-256mb
+
+services:
+  - type: web
+    name: kuskus-web
+    runtime: docker
+    dockerfilePath: ./frontend/Dockerfile
+    dockerContext: ./frontend
+    envVars:
+      - key: PORT
+        value: "10000"
+      - key: API_UPSTREAM
+        fromService:
+          type: pserv
+          name: kuskus-api
+          property: hostport
+
+  - type: pserv
+    name: kuskus-api
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    envVars:
+      - key: PORT
+        value: "8080"
+      - key: ConnectionStrings__Default
+        fromDatabase:
+          name: kuskus-db
+          property: connectionString
+      - key: Jwt__Secret
+        generateValue: true
+      - key: Database__MigrateOnStartup
+        value: "true"
+      - key: ForwardedHeaders__Enabled
+        value: "true"
+      # Render serves the site over HTTPS, so the admin cookie can be Secure.
+      - key: AuthCookie__Secure
+        value: "true"
+      # Hash of "admin" for first start only; change it from the admin area afterwards.
+      - key: Admin__PasswordHash
+        value: AQAAAAIAAYagAAAAECliO1aVr/omJHp1yMHPeanrqq/pzJemPc8qU8AbIJI77Ic4Lf8NWIbyv+Eu5UVwBQ==
+      # cloudinary://<api_key>:<api_secret>@<cloud_name> - Render asks for it on first deploy.
+      - key: Cloudinary__Url
+        sync: false
