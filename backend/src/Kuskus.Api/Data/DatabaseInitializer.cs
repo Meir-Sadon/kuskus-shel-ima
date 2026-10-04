@@ -26,19 +26,20 @@ public static class DatabaseInitializer
     public const string DrinksCategoryName = "שתיה";
     public const decimal DrinkPrice = 12m;
 
-    private static readonly string[] DrinkNames =
+    // Name and picture file (frontend/public/drinks/<slug>.svg, served from the site root).
+    private static readonly (string Name, string Slug)[] Drinks =
     [
-        "קוקה קולה",
-        "קוקה קולה זירו",
-        "ספרייט",
-        "פאנטה",
-        "שוופס",
-        "פיוז טי אפרסק",
-        "פיוז טי לימון",
-        "מים מינרליים",
-        "סודה",
-        "מיץ תפוזים",
-        "מיץ ענבים",
+        ("קוקה קולה", "cola"),
+        ("קוקה קולה זירו", "cola-zero"),
+        ("ספרייט", "sprite"),
+        ("פאנטה", "fanta"),
+        ("שוופס", "schweppes"),
+        ("פיוז טי אפרסק", "fuze-peach"),
+        ("פיוז טי לימון", "fuze-lemon"),
+        ("מים מינרליים", "water"),
+        ("סודה", "soda"),
+        ("מיץ תפוזים", "orange-juice"),
+        ("מיץ ענבים", "grape-juice"),
     ];
 
     /// <summary>
@@ -61,7 +62,7 @@ public static class DatabaseInitializer
             : await db.Dishes.Where(d => d.CategoryId == category.Id).Select(d => d.Name).ToListAsync();
 
         var added = 0;
-        foreach (var name in DrinkNames.Where(n => !existing.Contains(n)))
+        foreach (var (name, slug) in Drinks.Where(d => !existing.Contains(d.Name)))
         {
             category.Dishes.Add(new Entities.Dish
             {
@@ -72,6 +73,7 @@ public static class DatabaseInitializer
                 MaxAmount = 10,
                 AmountStep = 1,
                 UnitPrice = DrinkPrice,
+                Images = [new Entities.DishImage { Url = $"/drinks/{slug}.svg", PublicId = $"static/drinks/{slug}", DisplayOrder = 0 }],
             });
             added++;
         }
