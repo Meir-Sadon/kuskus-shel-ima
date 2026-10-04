@@ -312,3 +312,26 @@ public sealed class OrdersTests(PostgresFixture postgres) : IAsyncLifetime
         Assert.Equal(HttpStatusCode.OK, (await bare.GetAsync("/api/menu")).StatusCode);
     }
 }
+
+[Collection(PostgresCollection.Name)]
+public sealed class ShowCodeOnScreenTests(PostgresFixture postgres)
+{
+    private static async Task<HttpResponseMessage> Send(ApiFactory factory) =>
+        await factory.CreateApiClient().PostAsJsonAsync("/api/phone-verification/send", new { phone = "0501234567" });
+
+    [Fact]
+    public async Task Code_is_not_returned_by_default()
+    {
+        using var factory = new ApiFactory(postgres);
+        var response = await Send(factory);
+        Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Code_is_returned_when_the_test_setting_is_on()
+    {
+        using var factory = new ApiFactory(postgres, new() { ["WhatsApp:ShowCodeOnScreen"] = "true" });
+        var reply = await (await Send(factory)).Read<TestCodeDto>();
+        Assert.Equal(factory.WhatsApp.LastCode("0501234567"), reply.DevCode);
+    }
+}

@@ -288,6 +288,7 @@
       "transfer": "להעברת {{total}} ב־Bit / PayBox למספר:",
       "whatsapp": "פרטי ההזמנה נשלחו אליכם ב־WhatsApp.",
       "close": "סגירה"
-    }
+    },
+    "testCode": "מצב בדיקה: קוד האימות הוא {{code}}"
   }
 }

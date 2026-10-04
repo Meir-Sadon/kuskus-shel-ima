@@ -43,7 +43,8 @@ public class PhoneVerificationService(
 
     private string Audience => jwt.Value.Issuer + "/phone";
 
-    public async Task<SendCodeResult> SendCodeAsync(string phone, CancellationToken ct)
+    /// <summary>Sends a new code. The code itself is returned too, for the test-only show-on-screen setting.</summary>
+    public async Task<(SendCodeResult Result, string? Code)> SendCodeAsync(string phone, CancellationToken ct)
     {
         var now = time.GetUtcNow();
 
@@ -52,7 +53,7 @@ public class PhoneVerificationService(
 
         var since = now - SendWindow;
         if (await db.LoginCodes.CountAsync(c => c.Phone == phone && c.CreatedAt > since, ct) >= MaxCodesPerWindow)
-            return SendCodeResult.TooManyCodes;
+            return (SendCodeResult.TooManyCodes, null);
 
         var code = RandomNumberGenerator.GetInt32(0, 1_000_000).ToString("D6");
         db.LoginCodes.Add(new LoginCode
@@ -65,7 +66,7 @@ public class PhoneVerificationService(
         await db.SaveChangesAsync(ct);
 
         await whatsApp.SendAsync(phone, OrderMessages.LoginCode(code), ct);
-        return SendCodeResult.Sent;
+        return (SendCodeResult.Sent, code);
     }
 
     /// <summary>Checks the code. On success the code is used up and a short-lived token proves the phone.</summary>

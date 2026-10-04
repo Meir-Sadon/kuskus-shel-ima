@@ -7,7 +7,8 @@ namespace Kuskus.Api.Controllers;
 
 [Route("api/phone-verification")]
 [EnableRateLimiting(PublicControllerBase.WriteRateLimitPolicy)]
-public class PhoneVerificationController(PhoneVerificationService verification, ILogger<PhoneVerificationController> logger)
+public class PhoneVerificationController(
+    PhoneVerificationService verification, IConfiguration config, ILogger<PhoneVerificationController> logger)
     : PublicControllerBase
 {
     public record SendRequest(string? Phone);
@@ -15,6 +16,9 @@ public class PhoneVerificationController(PhoneVerificationService verification, 
     public record ConfirmRequest(string? Phone, string? Code);
 
     public record ConfirmedDto(string Token);
+
+    /// <summary>Only returned when <c>WhatsApp:ShowCodeOnScreen</c> is on.</summary>
+    public record TestCodeDto(string DevCode);
 
     [HttpPost("send")]
     public async Task<ActionResult> Send(SendRequest request, CancellationToken ct)
@@ -24,8 +28,13 @@ public class PhoneVerificationController(PhoneVerificationService verification, 
 
         try
         {
-            return await verification.SendCodeAsync(phone, ct) == SendCodeResult.TooManyCodes
-                ? StatusCode(StatusCodes.Status429TooManyRequests, new { code = "tooManyCodes" })
+            var (result, code) = await verification.SendCodeAsync(phone, ct);
+            if (result == SendCodeResult.TooManyCodes)
+                return StatusCode(StatusCodes.Status429TooManyRequests, new { code = "tooManyCodes" });
+
+            // Test-only: while WhatsApp is simulated, hand the code back so it can be shown on the page.
+            return config.GetValue<bool>("WhatsApp:ShowCodeOnScreen") && code is not null
+                ? Ok(new TestCodeDto(code))
                 : NoContent();
         }
         catch (Exception ex) when (ex is not OperationCanceledException)

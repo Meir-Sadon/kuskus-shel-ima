@@ -37,10 +37,10 @@ export function PhoneVerification({ phone, onPhoneChange, verified, onVerified, 
     setBusy(true)
     setMessage(null)
     try {
-      await verificationApi.send(normalized)
+      const reply = await verificationApi.send(normalized)
       setSent(true)
       setCode('')
-      setMessage({ text: t('order.codeSent') })
+      setMessage({ text: reply?.devCode ? t('order.testCode', { code: reply.devCode }) : t('order.codeSent') })
     } catch (err) {
       setMessage({ text: errorMessage(err), error: true })
     } finally {

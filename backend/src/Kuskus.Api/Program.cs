@@ -129,6 +129,9 @@ var app = builder.Build();
 if (config.GetValue<bool>("ForwardedHeaders:Enabled"))
     app.UseForwardedHeaders();
 
+if (config.GetValue<bool>("WhatsApp:ShowCodeOnScreen"))
+    app.Logger.LogWarning("WhatsApp__ShowCodeOnScreen is ON: login codes are shown on the page. Turn it off before launch.");
+
 app.UseMiddleware<RequireRequestHeaderMiddleware>();
 app.UseRateLimiter();
 app.UseAuthentication();

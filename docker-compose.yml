@@ -38,6 +38,8 @@ services:
       AuthCookie__Secure: "false"
       # cloudinary://<api_key>:<api_secret>@<cloud_name>. Without it, picture uploads are switched off.
       Cloudinary__Url: ${CLOUDINARY_URL:-}
+      # Test only, while WhatsApp is simulated: show the login code on the page. Set to false before launch.
+      WhatsApp__ShowCodeOnScreen: ${SHOW_CODE_ON_SCREEN:-true}
     ports:
       - "5000:8080"
 

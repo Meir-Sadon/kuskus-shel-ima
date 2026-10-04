@@ -108,6 +108,7 @@ Secrets are never committed. Set them in `appsettings.Development.json` locally 
 | `Database__MigrateOnStartup` | Apply migrations when the API starts |
 | `ForwardedHeaders__Enabled` | Trust `X-Forwarded-For` from one reverse proxy in front of the API |
 | `WhatsApp__Token`, `WhatsApp__PhoneNumberId` | WhatsApp Cloud API credentials (not used yet: messages are simulated, see below) |
+| `WhatsApp__ShowCodeOnScreen` | Test only: show login codes on the page while WhatsApp is simulated (default `false`) |
 | `Site__TimeZone` | Time zone for supply-day cutoffs (default `Asia/Jerusalem`) |
 | `Public__RequestsPerMinute` | Rate limit per IP for login codes and orders (default 30) |
 | `Cloudinary__Url` | `cloudinary://<api_key>:<api_secret>@<cloud_name>`. Without it, picture uploads are switched off |
@@ -115,6 +116,8 @@ Secrets are never committed. Set them in `appsettings.Development.json` locally 
 ## Simulated WhatsApp messages
 
 Until Meta approves the message templates (phase 5), nothing is sent: login codes, order confirmations and the new-order messages to the admin's phones are written to the API log instead (`WhatsApp (simulated) to ...`). To try the order flow locally, read the code from the log (`docker compose logs api`).
+
+For testing on a deployed site there is `WhatsApp__ShowCodeOnScreen=true`: the API then returns the code and the order page shows it ("מצב בדיקה: קוד האימות הוא …"). It is off by default, the API logs a warning at startup while it is on, and `docker-compose.yml` turns it on for local runs (`SHOW_CODE_ON_SCREEN=false` in `.env` turns it off). **Anyone could read the code, so remove it from the hosting environment before launch.**
 
 ## API notes
 

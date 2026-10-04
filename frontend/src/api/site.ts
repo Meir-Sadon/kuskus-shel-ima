@@ -110,7 +110,9 @@ export const siteApi = {
 }
 
 export const verificationApi = {
-  send: (phone: string) => apiJson<void>('/api/phone-verification/send', send('POST', { phone })),
+  /** Answers with devCode only when the server runs with WhatsApp__ShowCodeOnScreen (test setups). */
+  send: (phone: string) =>
+    apiJson<{ devCode?: string } | undefined>('/api/phone-verification/send', send('POST', { phone })),
   confirm: (phone: string, code: string) =>
     apiJson<{ token: string }>('/api/phone-verification/confirm', send('POST', { phone, code })),
 }

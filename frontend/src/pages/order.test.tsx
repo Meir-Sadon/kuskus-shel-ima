@@ -154,6 +154,14 @@ describe('Order page', () => {
     expect(api.sent('POST', '/api/orders')).toHaveLength(0)
   })
 
+  it('shows the code on screen when the server runs in test mode', async () => {
+    const { user } = await openOrderPage({ 'POST /api/phone-verification/send': () => ({ devCode: '483920' }) })
+    await user.type(screen.getByLabelText('טלפון'), '0501234567')
+    await user.click(screen.getByRole('button', { name: /שליחת קוד אימות/ }))
+
+    expect(await screen.findByText('מצב בדיקה: קוד האימות הוא 483920')).toBeInTheDocument()
+  })
+
   it('shows the code error from the server', async () => {
     const { user } = await openOrderPage({ 'POST /api/phone-verification/confirm': () => invalid({ Code: ['codeWrong'] }) })
     await user.type(screen.getByLabelText('טלפון'), '0501234567')
